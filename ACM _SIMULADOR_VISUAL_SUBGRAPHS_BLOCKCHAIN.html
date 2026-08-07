@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Explorador Interativo - Money Laundering Subgraphs on Blockchain</title>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --panel-bg: #1e293b;
+      --accent-blue: #38bdf8;
+      --accent-green: #22c55e;
+      --accent-red: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Header */
+    header {
+      background-color: #0b1120;
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.8rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      font-size: 1.1rem;
+      color: var(--accent-blue);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    header .badge {
+      background: rgba(56, 189, 248, 0.1);
+      color: var(--accent-blue);
+      padding: 0.2rem 0.6rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      border: 1px solid var(--accent-blue);
+    }
+
+    /* Container Principal */
+    .main-container {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 55px);
+    }
+
+    /* Painel Esquerdo: Explicação e Interação */
+    .sidebar {
+      width: 45%;
+      min-width: 420px;
+      background-color: var(--panel-bg);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    /* Abas de Navegação */
+    .nav-tabs {
+      display: flex;
+      background-color: #0f172a;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 0.8rem 0.5rem;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border-bottom: 2px solid transparent;
+    }
+
+    .tab-btn.active {
+      color: var(--accent-blue);
+      border-bottom: 2px solid var(--accent-blue);
+      background-color: var(--panel-bg);
+    }
+
+    .tab-content {
+      padding: 1.5rem;
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Seções de Conteúdo */
+    h2 {
+      font-size: 1.25rem;
+      margin-bottom: 0.75rem;
+      color: #fff;
+    }
+
+    h3 {
+      font-size: 1rem;
+      margin: 1rem 0 0.5rem 0;
+      color: var(--accent-blue);
+    }
+
+    p, li {
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    ul {
+      margin-left: 1.2rem;
+      margin-bottom: 1rem;
+    }
+
+    .highlight-card {
+      background-color: #0f172a;
+      border-left: 4px solid var(--accent-blue);
+      padding: 1rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1rem 0;
+    }
+
+    /* Canvas do Simulador de Subgrafos */
+    .simulator-box {
+      background: #090d16;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    canvas {
+      width: 100%;
+      height: 240px;
+      background-color: #050811;
+      border-radius: 6px;
+      margin-bottom: 0.8rem;
+    }
+
+    .controls {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-primary {
+      background-color: var(--accent-blue);
+      color: #000;
+    }
+
+    .btn-danger {
+      background-color: var(--accent-red);
+      color: #fff;
+    }
+
+    .btn-secondary {
+      background-color: var(--border-color);
+      color: var(--text-main);
+    }
+
+    /* Painel Direito: iFrame e Visualizador de Artigo */
+    .iframe-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: #ffffff;
+      position: relative;
+    }
+
+    .iframe-bar {
+      background-color: #1e293b;
+      padding: 0.5rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .iframe-fallback {
+      position: absolute;
+      top: 50px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--bg-dark);
+      color: var(--text-main);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .external-link {
+      color: var(--accent-blue);
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <h1>
+      <span>⚡</span> ACM Digital Library Explorer
+    </h1>
+    <span class="badge">ICAIF '24 Paper Reader</span>
+  </header>
+
+  <!-- Container de Layout Split -->
+  <div class="main-container">
+
+    <!-- LADO ESQUERDO: PAINEL INTERATIVO -->
+    <div class="sidebar">
+      <nav class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('resumo')">1. Visão Geral</button>
+        <button class="tab-btn" onclick="switchTab('metodologia')">2. IA & Grafos</button>
+        <button class="tab-btn" onclick="switchTab('simulador')">3. Simulador Visual</button>
+      </nav>
+
+      <!-- ABA 1: RESUMO DO ARTIGO -->
+      <div id="tab-resumo" class="tab-content active">
+        <h2>Identifying Money Laundering Subgraphs on the Blockchain</h2>
+        <p><strong>Artigo:</strong> ACM ICAIF '24 | DOI: 10.1145/3677052.3698635</p>
+
+        <div class="highlight-card">
+          <strong>🎯 Objetivo Principal:</strong>
+          Detectar estruturas complexas de lavagem de dinheiro em blockchains públicas mapeando transações financeiras como <i>subgrafos direcionados</i> e aplicando aprendizado de máquina em grafos (GNNs).
+        </div>
+
+        <h3>Por que a detecção tradicional falha?</h3>
+        <ul>
+          <li><strong>Pseudonimato:</strong> Endereços cripto não revelam identidades reais diretamente.</li>
+          <li><strong>Estratégia de Smurfing/Layering:</strong> Redes criminosas dividem fundos ilícitos em centenas de pequenas transações em cadeia para obscurecer a origem.</li>
+          <li><strong>Volume de dados:</strong> Blockchains como Ethereum contêm bilhões de transações interconectadas.</li>
+        </ul>
+
+        <h3>A Solução Proposta</h3>
+        <p>Em vez de analisar carteiras de forma isolada, os autores propõem algoritmos para extrair e classificar <strong>subgrafos</strong> (padrões de fluxo de fundos em formato de teia/circuito) capazes de capturar técnicas como <i>peeling chains</i> e <i>mixers</i>.</p>
+      </div>
+
+      <!-- ABA 2: METODOLOGIA -->
+      <div id="tab-metodologia" class="tab-content">
+        <h2>Metodologia Baseada em Grafos (Graph AI)</h2>
+        <p>O artigo modela a blockchain como um grafo temporal ponderado $G = (V, E)$.</p>
+
+        <div class="highlight-card">
+          <ul>
+            <li><strong>Vértices ($V$):</strong> Endereços de carteiras (Wallets).</li>
+            <li><strong>Arestas ($E$):</strong> Transações de transferência de ativos.</li>
+            <li><strong>Subgrafo ($S \subset G$):</strong> O conjunto de carteiras interconectadas executando um fluxo coordenado.</li>
+          </ul>
+        </div>
+
+        <h3>Redes Neurais em Grafos (GNNs)</h3>
+        <p>A abordagem utiliza modelos como Graph Convolutional Networks (GCN) e GraphSAGE para agregar recursos espaciais e temporais:</p>
+        <ul>
+          <li>Frequência e valores das transações;</li>
+          <li>Topologia do subgrafo (grau de entrada/saída, ciclos, dispersão);</li>
+          <li>Padrões temporais (velocidade entre saltos de transferência).</li>
+        </ul>
+      </div>
+
+      <!-- ABA 3: SIMULADOR INTERATIVO -->
+      <div id="tab-simulador" class="tab-content">
+        <h2>Simulador de Detecção de Subgrafos</h2>
+        <p>Veja como um modelo de IA analisa a rede. Clique em <strong>"Executar Análise GNN"</strong> para identificar o circuito ilícito escondido no grafo de transações.</p>
+
+        <div class="simulator-box">
+          <canvas id="graphCanvas"></canvas>
+          <div class="controls">
+            <button class="btn btn-primary" onclick="runGNNAnalysis()">🔍 Executar Análise GNN</button>
+            <button class="btn btn-secondary" onclick="resetGraph()">🔄 Resetar Grafo</button>
+          </div>
+        </div>
+
+        <div id="analysis-output" style="margin-top: 1rem; font-size: 0.85rem; color: var(--accent-blue);">
+          Status: Aguardando verificação da rede de transações...
+        </div>
+      </div>
+
+    </div>
+
+    <!-- LADO DIREITO: IFRAME DO ARTIGO -->
+    <div class="iframe-container">
+      <div class="iframe-bar">
+        <span>📄 Leitor do Artigo ACM Digital Library</span>
+        <a href="https://dl.acm.org/doi/fullHtml/10.1145/3677052.3698635" target="_blank" class="external-link">
+          Abrir na ACM ↗
+        </a>
+      </div>
+
+      <iframe 
+        id="acmFrame"
+        src="https://dl.acm.org/doi/fullHtml/10.1145/3677052.3698635" 
+        title="ACM Article"
+        onerror="showFallback()">
+      </iframe>
+
+      <!-- Fallback caso a ACM bloqueie a exibição via X-Frame-Options -->
+      <div class="iframe-fallback" id="iframeFallback">
+        <h2>Visualizador em iFrame Restrito</h2>
+        <p style="margin: 1rem 0;">A ACM Digital Library pode restringir a exibição direta dentro de iFrames devido a políticas de segurança (X-Frame-Options / CORS).</p>
+        <a href="https://dl.acm.org/doi/fullHtml/10.1145/3677052.3698635" target="_blank" class="btn btn-primary" style="text-decoration: none;">
+          Ler Artigo Completo na ACM DL ↗
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- JavaScript Interativo -->
+  <script>
+    // Gerenciador de Abas
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+      event.target.classList.add('active');
+      document.getElementById('tab-' + tabId).classList.add('active');
+
+      if(tabId === 'simulador') {
+        drawGraph();
+      }
+    }
+
+    // Detector de restrição do iFrame
+    setTimeout(() => {
+      try {
+        const frame = document.getElementById('acmFrame');
+        if (!frame.contentWindow || frame.contentWindow.length === 0) {
+          // Pode ter sido bloqueado por SameOrigin
+        }
+      } catch (e) {
+        // Bloqueio de segurança detectado (normal em sites acadêmicos restritos)
+        console.log("Aviso: iFrame carregado com proteção CORS/SameOrigin.");
+      }
+    }, 2000);
+
+    // SIMULADOR VISUAL DE GRAFOS EM CANVAS
+    const canvas = document.getElementById('graphCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Ajustar resolução interna do Canvas
+    canvas.width = 380;
+    canvas.height = 240;
+
+    let nodes = [
+      { id: 1, x: 50, y: 120, label: "Origem", type: "normal" },
+      { id: 2, x: 130, y: 60, label: "Smurf 1", type: "suspect" },
+      { id: 3, x: 130, y: 180, label: "Smurf 2", type: "suspect" },
+      { id: 4, x: 230, y: 60, label: "Mixer A", type: "suspect" },
+      { id: 5, x: 230, y: 180, label: "Mixer B", type: "suspect" },
+      { id: 6, x: 320, y: 120, label: "Destino", type: "normal" }
+    ];
+
+    let edges = [
+      { from: 1, to: 2 }, { from: 1, to: 3 },
+      { from: 2, to: 4 }, { from: 3, to: 5 },
+      { from: 4, to: 6 }, { from: 5, to: 6 }
+    ];
+
+    let isAnalyzed = false;
+
+    function drawGraph() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Desenhar Arestas (Transações)
+      edges.forEach(edge => {
+        const n1 = nodes.find(n => n.id === edge.from);
+        const n2 = nodes.find(n => n.id === edge.to);
+
+        ctx.beginPath();
+        ctx.moveTo(n1.x, n1.y);
+        ctx.lineTo(n2.x, n2.y);
+        ctx.strokeStyle = isAnalyzed && (n1.type === "suspect" && n2.type === "suspect") ? "#ef4444" : "#334155";
+        ctx.lineWidth = isAnalyzed && (n1.type === "suspect" && n2.type === "suspect") ? 2.5 : 1;
+        ctx.stroke();
+      });
+
+      // Desenhar Nós (Carteiras)
+      nodes.forEach(node => {
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, 16, 0, Math.PI * 2);
+
+        if (isAnalyzed) {
+          if (node.type === "suspect") {
+            ctx.fillStyle = "#ef4444"; // Vermelho = Alerta GNN
+          } else {
+            ctx.fillStyle = "#22c55e"; // Verde = Normal
+          }
+        } else {
+          ctx.fillStyle = "#38bdf8"; // Azul Padrão
+        }
+
+        ctx.fill();
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // Rótulo
+        ctx.fillStyle = "#f8fafc";
+        ctx.font = "10px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(node.label, node.x, node.y + 28);
+      });
+    }
+
+    function runGNNAnalysis() {
+      isAnalyzed = true;
+      drawGraph();
+      document.getElementById('analysis-output').innerHTML = 
+        "⚠️ <strong>Alerta de Subgrafo Detectado:</strong> Padrão em camada (Layering) identificado entre as carteiras Smurf 1, 2 e Mixers com 98.4% de probabilidade de lavagem de dinheiro.";
+    }
+
+    function resetGraph() {
+      isAnalyzed = false;
+      drawGraph();
+      document.getElementById('analysis-output').innerText = 
+        "Status: Aguardando verificação da rede de transações...";
+    }
+
+    // Inicialização
+    drawGraph();
+  </script>
+</body>
+</html>
