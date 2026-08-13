@@ -10,3 +10,4 @@ Push to the Branch (git push origin feature/AmazingFeature)
 Open a Pull Request
 About
 Web simulation of Ubuntu 20.04, 
+<img width="864" height="1600" alt="WhatsApp Image 2026-08-12 at 16 18 56" src="https://github.com/user-attachments/assets/dc81e31c-d1c1-43f0-b8de-657ad1ed3016" />
